@@ -1,6 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -30,12 +38,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  final _collection = FirebaseFirestore.instance.collection('counter');
+  void _incrementCounter() async {
+    final currentData = await _collection.doc('data').get();
+    final counter = currentData['data'] as int;
+    _collection.doc('data').update({'data': counter + 1});
   }
 
   @override
@@ -51,10 +58,24 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'You have pushed the button this many times:',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            StreamBuilder(
+                stream: _collection.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text(snapshot.error.toString());
+                  }
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  final data = snapshot.data!;
+                  final counter = data.docs[0]['data'];
+
+                  return Text(
+                    '$counter',
+                    style: Theme.of(context).textTheme.headline4,
+                  );
+                })
           ],
         ),
       ),
