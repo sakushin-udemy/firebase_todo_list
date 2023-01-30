@@ -1,9 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'data/todo.dart';
+import 'firebase_options.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -51,35 +58,11 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime? _selectedDateTime = DateTime.now();
   final formatDate = DateFormat('yyyy/MM/dd');
 
-  List<Todo> todo = [
-    Todo(
-      id: '1',
-      title: 'あいうえお',
-      isDone: false,
-      colorNo: 0,
-      deadlineTime: DateTime(2023, 5, 5),
-      createdTime: DateTime(2023, 1, 5),
-    ),
-    Todo(
-      id: '2',
-      title: 'かきくけこ',
-      isDone: true,
-      colorNo: 1,
-      deadlineTime: DateTime(2023, 5, 5),
-      createdTime: DateTime(2023, 1, 5),
-    ),
-    Todo(
-      id: '3',
-      title: 'さしすせそ',
-      isDone: false,
-      colorNo: 2,
-      deadlineTime: DateTime(2023, 5, 5),
-      createdTime: DateTime(2023, 1, 5),
-    )
-  ];
-
   static const circularEdge = Radius.circular(16.0);
-
+  final _collection = FirebaseFirestore.instance
+      .collection('todo')
+      .doc('user')
+      .collection('user_todo');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,43 +74,57 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: ListView.builder(
-                  itemCount: todo.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: colors[todo[index].colorNo],
-                        borderRadius: BorderRadius.vertical(
-                          top: index == 0 ? circularEdge : Radius.zero,
-                          bottom: index == todo.length - 1
-                              ? circularEdge
-                              : Radius.zero,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 4.0),
-                        child: Row(
-                          children: [
-                            Transform.scale(
-                              scale: 1.5,
-                              child: Checkbox(
-                                value: todo[index].isDone,
-                                shape: const CircleBorder(),
-                                onChanged: (isChecked) =>
-                                    _onChangeIsDone(index, isChecked),
+                child: StreamBuilder(
+                    stream: _collection.snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else if (!snapshot.hasData) {
+                        return const CircularProgressIndicator();
+                      }
+
+                      final todo = snapshot.data!.docs
+                          .map((e) => Todo.fromJson(e.data()))
+                          .toList();
+                      return ListView.builder(
+                        itemCount: todo.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: colors[todo[index].colorNo],
+                              borderRadius: BorderRadius.vertical(
+                                top: index == 0 ? circularEdge : Radius.zero,
+                                bottom: index == todo.length - 1
+                                    ? circularEdge
+                                    : Radius.zero,
                               ),
                             ),
-                            Text(
-                              todo[index].title,
-                              style: Theme.of(context).textTheme.titleMedium,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0, vertical: 4.0),
+                              child: Row(
+                                children: [
+                                  Transform.scale(
+                                    scale: 1.5,
+                                    child: Checkbox(
+                                      value: todo[index].isDone,
+                                      shape: const CircleBorder(),
+                                      onChanged: (isChecked) => _onChangeIsDone(
+                                          todo[index], isChecked),
+                                    ),
+                                  ),
+                                  Text(
+                                    todo[index].title,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                          );
+                        },
+                      );
+                    }),
               ),
             ),
           ],
@@ -205,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                       onPressed: _title.isEmpty
                           ? null
-                          : () {
+                          : () async {
                               final newTodo = Todo(
                                 id: '',
                                 title: _title,
@@ -214,12 +211,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                 deadlineTime: _selectedDateTime,
                                 createdTime: DateTime.now(),
                               );
-
-                              setState(() {
-                                todo.add(newTodo);
-                              });
-
-                              Navigator.pop(context);
+                              final doc =
+                                  await _collection.add(newTodo.toJson());
+                              final newTodoWithId =
+                                  newTodo.copyWith(id: doc.id);
+                              _collection
+                                  .doc(newTodoWithId.id)
+                                  .update(newTodoWithId.toJson());
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             },
                       child: const Text('追加')),
                 ],
@@ -231,12 +232,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _onChangeIsDone(int index, bool? isChecked) {
+  void _onChangeIsDone(Todo todo, bool? isChecked) {
     if (isChecked == null) {
       return;
     }
-    setState(() {
-      todo[index] = todo[index].copyWith(isDone: isChecked);
-    });
+
+    final newData = todo.copyWith(isDone: isChecked);
+    _collection.doc(newData.id).update(newData.toJson());
+    //.update({'isDone': isChecked});
   }
 }
