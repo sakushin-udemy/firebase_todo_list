@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_todo_list/repositories/todo_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -59,10 +59,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final formatDate = DateFormat('yyyy/MM/dd');
 
   static const circularEdge = Radius.circular(16.0);
-  final _collection = FirebaseFirestore.instance
-      .collection('todo')
-      .doc('user')
-      .collection('user_todo');
+
+  final _todoRepository = TodoRepository('user');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: StreamBuilder(
-                    stream: _collection.snapshots(),
+                    stream: _todoRepository.stream().snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
@@ -211,13 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 deadlineTime: _selectedDateTime,
                                 createdTime: DateTime.now(),
                               );
-                              final doc =
-                                  await _collection.add(newTodo.toJson());
-                              final newTodoWithId =
-                                  newTodo.copyWith(id: doc.id);
-                              _collection
-                                  .doc(newTodoWithId.id)
-                                  .update(newTodoWithId.toJson());
+                              _todoRepository.add(newTodo);
                               if (context.mounted) {
                                 Navigator.pop(context);
                               }
@@ -238,7 +231,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     final newData = todo.copyWith(isDone: isChecked);
-    _collection.doc(newData.id).update(newData.toJson());
-    //.update({'isDone': isChecked});
+    _todoRepository.update(newData);
   }
 }
