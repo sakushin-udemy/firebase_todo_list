@@ -147,4 +147,12 @@ main() {
     expect(list[1].title, todo2.title);
     expect(list[2].title, todo1.title);
   });
+
+  test('条件', () async {
+    await Future.wait([todo1, todo2, todo3].map(repository.add));
+    expect((await repository.stream().count().get()).count, 3);
+
+    expect((await repository.stream(isDone: true).count().get()).count, 1);
+    expect((await repository.stream(isDone: false).count().get()).count, 2);
+  });
 }
