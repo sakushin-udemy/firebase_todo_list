@@ -117,7 +117,7 @@ main() {
     expect(list[2].title, todo2.title);
   });
 
-  test('ソート deadlineTime', () async {
+  test('ソート deadlineTime 昇順', () async {
     await Future.wait([todo1, todo2, todo3].map(repository.add));
 
     final dataSortedByCreateDate =
@@ -130,5 +130,21 @@ main() {
     expect(list[0].title, todo1.title);
     expect(list[1].title, todo2.title);
     expect(list[2].title, todo3.title);
+  });
+
+  test('ソート deadlineTime 降順', () async {
+    await Future.wait([todo1, todo2, todo3].map(repository.add));
+
+    final dataSortedByCreateDate = await repository
+        .stream(sortMethod: SortMethod.deadlineTime, descending: true)
+        .get();
+    final list = dataSortedByCreateDate.docs
+        .map(
+          (e) => Todo.fromJson(e.data()),
+        )
+        .toList();
+    expect(list[0].title, todo3.title);
+    expect(list[1].title, todo2.title);
+    expect(list[2].title, todo1.title);
   });
 }

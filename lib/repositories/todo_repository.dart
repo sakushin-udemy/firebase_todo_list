@@ -21,9 +21,11 @@ class TodoRepository {
   final String userId;
 
   /// TODOを表示
-  Query<Map<String, dynamic>> stream({SortMethod? sortMethod}) {
+  Query<Map<String, dynamic>> stream(
+      {SortMethod? sortMethod, bool? descending}) {
     if (sortMethod != null) {
-      return _collection.orderBy(sortMethod.name);
+      return _collection.orderBy(sortMethod.name,
+          descending: descending ?? false);
     }
     return _collection;
   }
