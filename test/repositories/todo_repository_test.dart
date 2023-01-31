@@ -43,7 +43,7 @@ main() {
   );
 
   test('追加とカウント', () async {
-    final data = repository.stream(sortMethod: SortMethod.createdTime);
+    final data = repository.stream();
     final result = data.count();
     expect((await result.get()).count, 0);
 
@@ -55,24 +55,12 @@ main() {
   });
 
   test('データの取得', () async {
-    expect(
-        (await repository
-                .stream(sortMethod: SortMethod.createdTime)
-                .count()
-                .get())
-            .count,
-        0);
+    expect((await repository.stream().count().get()).count, 0);
     final data1_ = await repository.find('id1');
     expect(data1_, isNull);
 
     final todo1Id = await repository.add(todo1);
-    expect(
-        (await repository
-                .stream(sortMethod: SortMethod.createdTime)
-                .count()
-                .get())
-            .count,
-        1);
+    expect((await repository.stream().count().get()).count, 1);
 
     final data1 = await repository.find(todo1Id);
     expect(data1, isNotNull);
@@ -83,30 +71,12 @@ main() {
   });
 
   test('データの削除', () async {
-    expect(
-        (await repository
-                .stream(sortMethod: SortMethod.createdTime)
-                .count()
-                .get())
-            .count,
-        0);
+    expect((await repository.stream().count().get()).count, 0);
     final data1Id = await repository.add(todo1);
-    expect(
-        (await repository
-                .stream(sortMethod: SortMethod.createdTime)
-                .count()
-                .get())
-            .count,
-        1);
+    expect((await repository.stream().count().get()).count, 1);
 
     await repository.delete(data1Id);
-    expect(
-        (await repository
-                .stream(sortMethod: SortMethod.createdTime)
-                .count()
-                .get())
-            .count,
-        0);
+    expect((await repository.stream().count().get()).count, 0);
 
     await repository.delete(data1Id);
   });
