@@ -44,4 +44,20 @@ main() {
     await repository.add(todo2);
     expect((await data.count().get()).count, 2);
   });
+
+  test('データの取得', () async {
+    expect((await repository.stream().count().get()).count, 0);
+    final data1_ = await repository.find('id1');
+    expect(data1_, isNull);
+
+    final todo1Id = await repository.add(todo1);
+    expect((await repository.stream().count().get()).count, 1);
+
+    final data1 = await repository.find(todo1Id);
+    expect(data1, isNotNull);
+    expect(data1!.id, todo1Id);
+    expect(data1.title, 'title1');
+    expect(data1.deadlineTime, DateTime(2022, 1, 1));
+    expect(data1.createdTime, DateTime(2022, 1, 2));
+  });
 }

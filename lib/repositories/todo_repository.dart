@@ -20,14 +20,26 @@ class TodoRepository {
   }
 
   /// TODOを追加
-  Future<void> add(Todo newTodo) async {
+  Future<String> add(Todo newTodo) async {
     final doc = await _collection.add(newTodo.toJson());
     final newTodoWithId = newTodo.copyWith(id: doc.id);
     _collection.doc(newTodoWithId.id).update(newTodoWithId.toJson());
+
+    return doc.id;
   }
 
   /// TODOを更新
   Future<void> update(Todo todo) async {
     _collection.doc(todo.id).update(todo.toJson());
+  }
+
+  Future<Todo?> find(String todoId) async {
+    final doc = await _collection.doc(todoId).get();
+    if (doc.exists) {
+      return Todo.fromJson(doc.data()!);
+    } else {
+      return null;
+      //      throw Exception('指定のTodoはありません: $todoId');
+    }
   }
 }
