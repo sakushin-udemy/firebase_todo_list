@@ -42,4 +42,8 @@ class TodoRepository {
       //      throw Exception('指定のTodoはありません: $todoId');
     }
   }
+
+  Future<void> delete(String toodId) async {
+    return _collection.doc(toodId).delete();
+  }
 }

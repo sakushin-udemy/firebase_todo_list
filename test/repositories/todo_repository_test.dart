@@ -60,4 +60,15 @@ main() {
     expect(data1.deadlineTime, DateTime(2022, 1, 1));
     expect(data1.createdTime, DateTime(2022, 1, 2));
   });
+
+  test('データの削除', () async {
+    expect((await repository.stream().count().get()).count, 0);
+    final data1Id = await repository.add(todo1);
+    expect((await repository.stream().count().get()).count, 1);
+
+    await repository.delete(data1Id);
+    expect((await repository.stream().count().get()).count, 0);
+
+    await repository.delete(data1Id);
+  });
 }
