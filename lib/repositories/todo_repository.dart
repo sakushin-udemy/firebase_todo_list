@@ -2,6 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 import '../data/todo.dart';
 
+// ソート方法
+enum SortMethod {
+  deadlineTime,
+  createdTime,
+}
+
 /// TODOのレポジトリ
 class TodoRepository {
   late final _collection = GetIt.I<FirebaseFirestore>()
@@ -15,8 +21,8 @@ class TodoRepository {
   final String userId;
 
   /// TODOを表示
-  CollectionReference<Map<String, dynamic>> stream() {
-    return _collection;
+  Query<Map<String, dynamic>> stream({required SortMethod sortMethod}) {
+    return _collection.orderBy(sortMethod.name);
   }
 
   /// TODOを追加
