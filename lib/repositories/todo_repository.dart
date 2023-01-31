@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_it/get_it.dart';
 import '../data/todo.dart';
 
 /// TODOのレポジトリ
 class TodoRepository {
-  late final _collection = FirebaseFirestore.instance
+  late final _collection = GetIt.I<FirebaseFirestore>()
       .collection('todo')
       .doc(userId)
       .collection('user_todo');
