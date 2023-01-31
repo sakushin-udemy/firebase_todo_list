@@ -23,14 +23,15 @@ class TodoRepository {
   /// TODOを表示
   Query<Map<String, dynamic>> stream(
       {SortMethod? sortMethod, bool? descending, bool? isDone}) {
+    Query<Map<String, dynamic>> collection = _collection;
     if (isDone != null) {
-      return _collection.where('isDone', isEqualTo: isDone);
+      collection = collection.where('isDone', isEqualTo: isDone);
     }
     if (sortMethod != null) {
-      return _collection.orderBy(sortMethod.name,
-          descending: descending ?? false);
+      collection =
+          collection.orderBy(sortMethod.name, descending: descending ?? false);
     }
-    return _collection;
+    return collection;
   }
 
   /// TODOを追加
