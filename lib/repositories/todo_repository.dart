@@ -33,6 +33,7 @@ class TodoRepository {
     _collection.doc(todo.id).update(todo.toJson());
   }
 
+  /// TODOの検索
   Future<Todo?> find(String todoId) async {
     final doc = await _collection.doc(todoId).get();
     if (doc.exists) {
@@ -43,6 +44,7 @@ class TodoRepository {
     }
   }
 
+  /// TODOの削除
   Future<void> delete(String toodId) async {
     return _collection.doc(toodId).delete();
   }
