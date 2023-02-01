@@ -4,7 +4,7 @@ import '../data/db_user.dart';
 class AuthenticationRepository {
   FirebaseAuth auth = FirebaseAuth.instance;
 
-  Future<void> register(DbUser user, String password) async {
+  Future<String> register(DbUser user, String password) async {
     final result = await auth.createUserWithEmailAndPassword(
       email: user.email,
       password: password,
@@ -17,5 +17,7 @@ class AuthenticationRepository {
 
     final firebaseUser = result.user!;
     firebaseUser.updateDisplayName(user.loginName);
+
+    return uid;
   }
 }

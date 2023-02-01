@@ -1,4 +1,5 @@
 import 'package:firebase_todo_list/repositories/authentication_repository.dart';
+import 'package:firebase_todo_list/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
 
 import 'data/db_user.dart';
@@ -80,7 +81,7 @@ class _LoginDialogState extends State<LoginDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () {
+          onPressed: () async {
             final result = _formKey.currentState?.validate() ?? false;
             if (!result) {
               return;
@@ -96,7 +97,12 @@ class _LoginDialogState extends State<LoginDialog> {
             );
 
             final repository = AuthenticationRepository();
-            repository.register(user, _passwordController.text);
+            final uid =
+                await repository.register(user, _passwordController.text);
+            final userWithUid = user.copyWith(authenticationId: uid);
+
+            final userRepository = UserRepository();
+            await userRepository.add(userWithUid);
           },
           child: Text(_isRegister ? '登録' : 'ログイン'),
         )
