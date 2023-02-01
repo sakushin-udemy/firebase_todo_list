@@ -69,6 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final _todoRepository = TodoRepository('user');
 
+  bool _visibleDoneItem = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,11 +79,31 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Row(
+              children: [
+                Transform.scale(
+                  scale: 1.5,
+                  child: Checkbox(
+                      value: _visibleDoneItem,
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setState(() {
+                          _visibleDoneItem = value;
+                        });
+                      }),
+                ),
+                const Text('実施済みも表示'),
+              ],
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: StreamBuilder(
-                    stream: _todoRepository.stream().snapshots(),
+                    stream: _todoRepository
+                        .stream(isDone: _visibleDoneItem ? null : false)
+                        .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
