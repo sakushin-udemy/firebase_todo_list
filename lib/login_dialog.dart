@@ -10,6 +10,16 @@ class LoginDialog extends StatefulWidget {
 class _LoginDialogState extends State<LoginDialog> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return AlertDialog(
+      content: Column(
+        children: [],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {},
+          child: const Text('完了'),
+        )
+      ],
+    );
   }
 }
