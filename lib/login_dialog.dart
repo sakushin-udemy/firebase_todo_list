@@ -68,6 +68,7 @@ class _LoginDialogState extends State<LoginDialog> {
                     controller: _confirmPasswordController,
                     label: 'パスワードの確認',
                     obscureText: true,
+                    equalsController: _passwordController,
                   ),
               ],
             ),
@@ -107,11 +108,13 @@ class _UserInfoInput extends StatelessWidget {
     required this.controller,
     required this.label,
     this.obscureText,
+    this.equalsController,
   });
 
   final TextEditingController controller;
   final String label;
   final bool? obscureText;
+  final TextEditingController? equalsController;
 
   final boaderStyle = OutlineInputBorder(
     borderRadius: BorderRadius.circular(16),
@@ -130,6 +133,12 @@ class _UserInfoInput extends StatelessWidget {
         validator: (value) {
           if (value?.isEmpty ?? true) {
             return '必須です';
+          }
+
+          if (equalsController != null) {
+            if (controller.text != equalsController!.text) {
+              return 'パスワードが一致しません';
+            }
           }
           return null;
         },
