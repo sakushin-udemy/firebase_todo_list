@@ -76,7 +76,14 @@ class _LoginDialogState extends State<LoginDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            final result = _formKey.currentState?.validate() ?? false;
+            if (!result) {
+              return;
+            }
+
+            _formKey.currentState!.save();
+          },
           child: Text(_isRegister ? '登録' : 'ログイン'),
         )
       ],
@@ -95,7 +102,7 @@ class _LoginDialogState extends State<LoginDialog> {
 }
 
 class _UserInfoInput extends StatelessWidget {
-  const _UserInfoInput({
+  _UserInfoInput({
     super.key,
     required this.controller,
     required this.label,
@@ -106,6 +113,13 @@ class _UserInfoInput extends StatelessWidget {
   final String label;
   final bool? obscureText;
 
+  final boaderStyle = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(16),
+    borderSide: const BorderSide(
+      width: 1,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -113,19 +127,25 @@ class _UserInfoInput extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         obscureText: obscureText ?? false,
+        validator: (value) {
+          if (value?.isEmpty ?? true) {
+            return '必須です';
+          }
+          return null;
+        },
         decoration: InputDecoration(
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+          border: boaderStyle,
+          focusedBorder: boaderStyle.copyWith(
             borderSide: const BorderSide(
               width: 2,
             ),
           ),
           labelStyle: Theme.of(context).textTheme.bodyMedium,
           labelText: label,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+          enabledBorder: boaderStyle,
+          errorBorder: boaderStyle.copyWith(
             borderSide: const BorderSide(
-              width: 1,
+              color: Colors.red,
             ),
           ),
         ),
