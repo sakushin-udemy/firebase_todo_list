@@ -46,24 +46,27 @@ class _LoginDialogState extends State<LoginDialog> {
                 controller: _loginNameController,
                 label: 'ログイン名',
               ),
-              _UserInfoInput(
-                controller: _emailController,
-                label: 'E-mail',
-              ),
-              _UserInfoInput(
-                controller: _nicknameController,
-                label: 'ニックネーム',
-              ),
+              if (_isRegister)
+                _UserInfoInput(
+                  controller: _emailController,
+                  label: 'E-mail',
+                ),
+              if (_isRegister)
+                _UserInfoInput(
+                  controller: _nicknameController,
+                  label: 'ニックネーム',
+                ),
               _UserInfoInput(
                 controller: _passwordController,
                 label: 'パスワード',
                 obscureText: true,
               ),
-              _UserInfoInput(
-                controller: _confirmPasswordController,
-                label: 'パスワードの確認',
-                obscureText: true,
-              ),
+              if (_isRegister)
+                _UserInfoInput(
+                  controller: _confirmPasswordController,
+                  label: 'パスワードの確認',
+                  obscureText: true,
+                ),
             ],
           ),
         ),
@@ -71,7 +74,7 @@ class _LoginDialogState extends State<LoginDialog> {
       actions: [
         TextButton(
           onPressed: () {},
-          child: const Text('完了'),
+          child: Text(_isRegister ? '登録' : 'ログイン'),
         )
       ],
     );
