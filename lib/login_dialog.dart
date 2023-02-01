@@ -20,6 +20,9 @@ class _LoginDialogState extends State<LoginDialog> {
 
   bool _isRegister = false;
   final _formKey = GlobalKey<FormState>();
+
+  final auth = AuthenticationRepository();
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -46,6 +49,14 @@ class _LoginDialogState extends State<LoginDialog> {
                         });
                       },
                     ),
+                    StreamBuilder<bool>(
+                        stream: auth.isLogin(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Container();
+                          }
+                          return Text(snapshot.data! ? 'ログイン中' : 'ログアウト中');
+                        })
                   ],
                 ),
                 _UserInfoInput(

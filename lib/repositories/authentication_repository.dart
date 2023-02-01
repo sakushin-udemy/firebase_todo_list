@@ -20,4 +20,8 @@ class AuthenticationRepository {
 
     return uid;
   }
+
+  Stream<bool> isLogin() {
+    return auth.userChanges().map((user) => user != null);
+  }
 }
