@@ -1,4 +1,7 @@
+import 'package:firebase_todo_list/repositories/authentication_repository.dart';
 import 'package:flutter/material.dart';
+
+import 'data/db_user.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({Key? key}) : super(key: key);
@@ -84,6 +87,16 @@ class _LoginDialogState extends State<LoginDialog> {
             }
 
             _formKey.currentState!.save();
+
+            final user = DbUser(
+              authenticationId: '',
+              loginName: _loginNameController.text,
+              email: _emailController.text,
+              nickname: _nicknameController.text,
+            );
+
+            final repository = AuthenticationRepository();
+            repository.register(user, _passwordController.text);
           },
           child: Text(_isRegister ? '登録' : 'ログイン'),
         )
