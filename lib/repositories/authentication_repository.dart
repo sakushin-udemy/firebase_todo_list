@@ -24,4 +24,8 @@ class AuthenticationRepository {
   Stream<bool> isLogin() {
     return auth.userChanges().map((user) => user != null);
   }
+
+  Future<void> signOut() async {
+    auth.signOut();
+  }
 }

@@ -92,6 +92,10 @@ class _LoginDialogState extends State<LoginDialog> {
       ),
       actions: [
         TextButton(
+          onPressed: () => auth.signOut(),
+          child: const Text('ログアウト'),
+        ),
+        TextButton(
           onPressed: () async {
             final result = _formKey.currentState?.validate() ?? false;
             if (!result) {
