@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final _todoRepository = TodoRepository('user');
 
   bool _visibleDoneItem = false;
+  bool _descending = false;
 
   @override
   Widget build(BuildContext context) {
@@ -80,21 +81,33 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Transform.scale(
-                  scale: 1.5,
-                  child: Checkbox(
-                      value: _visibleDoneItem,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setState(() {
-                          _visibleDoneItem = value;
-                        });
-                      }),
+                Row(
+                  children: [
+                    Transform.scale(
+                      scale: 1.5,
+                      child: Checkbox(
+                          value: _visibleDoneItem,
+                          onChanged: (value) {
+                            if (value == null) {
+                              return;
+                            }
+                            setState(() {
+                              _visibleDoneItem = value;
+                            });
+                          }),
+                    ),
+                    const Text('実施済みも表示'),
+                  ],
                 ),
-                const Text('実施済みも表示'),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _descending = !_descending;
+                      });
+                    },
+                    child: Text(_descending ? '締切 遅い' : '締切 早い'))
               ],
             ),
             Expanded(
@@ -102,7 +115,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.all(16.0),
                 child: StreamBuilder(
                     stream: _todoRepository
-                        .stream(isDone: _visibleDoneItem ? null : false)
+                        .stream(
+                          isDone: _visibleDoneItem ? null : false,
+                          sortMethod: SortMethod.deadlineTime,
+                          descending: _descending,
+                        )
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
@@ -145,6 +162,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                     todo[index].title,
                                     style:
                                         Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                  Expanded(child: Container()),
+                                  Text(
+                                    todo[index].deadlineTime == null
+                                        ? ''
+                                        : formatDate
+                                            .format(todo[index].deadlineTime!),
                                   ),
                                 ],
                               ),
