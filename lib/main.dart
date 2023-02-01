@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.lightBlue,
         ),
         scaffoldBackgroundColor: const Color.fromRGBO(0xF2, 0xF2, 0xF2, 1.0),
+        dialogBackgroundColor: const Color.fromRGBO(0xF2, 0xF2, 0xF2, 1.0),
       ),
       home: const MyHomePage(title: 'Flutter Todo'),
     );
