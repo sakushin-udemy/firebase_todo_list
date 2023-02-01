@@ -14,6 +14,8 @@ class _LoginDialogState extends State<LoginDialog> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  bool _isRegister = false;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -24,6 +26,22 @@ class _LoginDialogState extends State<LoginDialog> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              Row(
+                children: [
+                  const Text('新規登録'),
+                  Checkbox(
+                    value: _isRegister,
+                    onChanged: (value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setState(() {
+                        _isRegister = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
               _UserInfoInput(
                 controller: _loginNameController,
                 label: 'ログイン名',
