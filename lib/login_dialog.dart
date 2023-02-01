@@ -19,23 +19,9 @@ class _LoginDialogState extends State<LoginDialog> {
     return AlertDialog(
       content: Column(
         children: [
-          TextFormField(
-            decoration: InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  width: 2,
-                ),
-              ),
-              labelStyle: Theme.of(context).textTheme.bodyMedium,
-              labelText: 'ログイン名',
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  width: 1,
-                ),
-              ),
-            ),
+          _UserInfoInput(
+            controller: _loginNameController,
+            label: 'ログイン名',
           ),
         ],
       ),
@@ -56,5 +42,38 @@ class _LoginDialogState extends State<LoginDialog> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+}
+
+class _UserInfoInput extends StatelessWidget {
+  const _UserInfoInput({
+    super.key,
+    required this.controller,
+    required this.label,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            width: 2,
+          ),
+        ),
+        labelStyle: Theme.of(context).textTheme.bodyMedium,
+        labelText: label,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            width: 1,
+          ),
+        ),
+      ),
+    );
   }
 }
