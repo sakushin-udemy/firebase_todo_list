@@ -21,31 +21,33 @@ class _LoginDialogState extends State<LoginDialog> {
       content: SizedBox(
         height: size.height * 0.8,
         width: size.width * 0.8,
-        child: Column(
-          children: [
-            _UserInfoInput(
-              controller: _loginNameController,
-              label: 'ログイン名',
-            ),
-            _UserInfoInput(
-              controller: _emailController,
-              label: 'E-mail',
-            ),
-            _UserInfoInput(
-              controller: _nicknameController,
-              label: 'ニックネーム',
-            ),
-            _UserInfoInput(
-              controller: _passwordController,
-              label: 'パスワード',
-              obscureText: true,
-            ),
-            _UserInfoInput(
-              controller: _confirmPasswordController,
-              label: 'パスワードの確認',
-              obscureText: true,
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _UserInfoInput(
+                controller: _loginNameController,
+                label: 'ログイン名',
+              ),
+              _UserInfoInput(
+                controller: _emailController,
+                label: 'E-mail',
+              ),
+              _UserInfoInput(
+                controller: _nicknameController,
+                label: 'ニックネーム',
+              ),
+              _UserInfoInput(
+                controller: _passwordController,
+                label: 'パスワード',
+                obscureText: true,
+              ),
+              _UserInfoInput(
+                controller: _confirmPasswordController,
+                label: 'パスワードの確認',
+                obscureText: true,
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
