@@ -18,7 +18,26 @@ class _LoginDialogState extends State<LoginDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       content: Column(
-        children: [],
+        children: [
+          TextFormField(
+            decoration: InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  width: 2,
+                ),
+              ),
+              labelStyle: Theme.of(context).textTheme.bodyMedium,
+              labelText: 'ログイン名',
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  width: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
