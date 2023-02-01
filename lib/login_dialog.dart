@@ -15,7 +15,7 @@ class _LoginDialogState extends State<LoginDialog> {
   final _confirmPasswordController = TextEditingController();
 
   bool _isRegister = false;
-
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -24,50 +24,53 @@ class _LoginDialogState extends State<LoginDialog> {
         height: size.height * 0.8,
         width: size.width * 0.8,
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Text('新規登録'),
-                  Checkbox(
-                    value: _isRegister,
-                    onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
-                      setState(() {
-                        _isRegister = value;
-                      });
-                    },
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Text('新規登録'),
+                    Checkbox(
+                      value: _isRegister,
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setState(() {
+                          _isRegister = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                _UserInfoInput(
+                  controller: _loginNameController,
+                  label: 'ログイン名',
+                ),
+                if (_isRegister)
+                  _UserInfoInput(
+                    controller: _emailController,
+                    label: 'E-mail',
                   ),
-                ],
-              ),
-              _UserInfoInput(
-                controller: _loginNameController,
-                label: 'ログイン名',
-              ),
-              if (_isRegister)
+                if (_isRegister)
+                  _UserInfoInput(
+                    controller: _nicknameController,
+                    label: 'ニックネーム',
+                  ),
                 _UserInfoInput(
-                  controller: _emailController,
-                  label: 'E-mail',
-                ),
-              if (_isRegister)
-                _UserInfoInput(
-                  controller: _nicknameController,
-                  label: 'ニックネーム',
-                ),
-              _UserInfoInput(
-                controller: _passwordController,
-                label: 'パスワード',
-                obscureText: true,
-              ),
-              if (_isRegister)
-                _UserInfoInput(
-                  controller: _confirmPasswordController,
-                  label: 'パスワードの確認',
+                  controller: _passwordController,
+                  label: 'パスワード',
                   obscureText: true,
                 ),
-            ],
+                if (_isRegister)
+                  _UserInfoInput(
+                    controller: _confirmPasswordController,
+                    label: 'パスワードの確認',
+                    obscureText: true,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
