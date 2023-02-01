@@ -16,14 +16,37 @@ class _LoginDialogState extends State<LoginDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return AlertDialog(
-      content: Column(
-        children: [
-          _UserInfoInput(
-            controller: _loginNameController,
-            label: 'ログイン名',
-          ),
-        ],
+      content: SizedBox(
+        height: size.height * 0.8,
+        width: size.width * 0.8,
+        child: Column(
+          children: [
+            _UserInfoInput(
+              controller: _loginNameController,
+              label: 'ログイン名',
+            ),
+            _UserInfoInput(
+              controller: _emailController,
+              label: 'E-mail',
+            ),
+            _UserInfoInput(
+              controller: _nicknameController,
+              label: 'ニックネーム',
+            ),
+            _UserInfoInput(
+              controller: _passwordController,
+              label: 'パスワード',
+              obscureText: true,
+            ),
+            _UserInfoInput(
+              controller: _confirmPasswordController,
+              label: 'パスワードの確認',
+              obscureText: true,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -50,27 +73,34 @@ class _UserInfoInput extends StatelessWidget {
     super.key,
     required this.controller,
     required this.label,
+    this.obscureText,
   });
 
   final TextEditingController controller;
   final String label;
+  final bool? obscureText;
+
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            width: 2,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText ?? false,
+        decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              width: 2,
+            ),
           ),
-        ),
-        labelStyle: Theme.of(context).textTheme.bodyMedium,
-        labelText: label,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            width: 1,
+          labelStyle: Theme.of(context).textTheme.bodyMedium,
+          labelText: label,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              width: 1,
+            ),
           ),
         ),
       ),
