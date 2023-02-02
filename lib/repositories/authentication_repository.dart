@@ -25,6 +25,10 @@ class AuthenticationRepository {
     return auth.userChanges().map((user) => user != null);
   }
 
+  Stream<String> uid() {
+    return auth.userChanges().map((user) => user?.uid ?? '');
+  }
+
   Future<void> signOut() async {
     auth.signOut();
   }
