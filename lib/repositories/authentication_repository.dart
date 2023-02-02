@@ -28,4 +28,8 @@ class AuthenticationRepository {
   Future<void> signOut() async {
     auth.signOut();
   }
+
+  Future<void> login(String email, String password) async {
+    auth.signInWithEmailAndPassword(email: email, password: password);
+  }
 }

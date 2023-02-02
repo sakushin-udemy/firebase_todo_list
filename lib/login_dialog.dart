@@ -112,12 +112,19 @@ class _LoginDialogState extends State<LoginDialog> {
             );
 
             final repository = AuthenticationRepository();
-            final uid =
-                await repository.register(user, _passwordController.text);
-            final userWithUid = user.copyWith(authenticationId: uid);
+            if (_isRegister) {
+              final uid =
+                  await repository.register(user, _passwordController.text);
+              final userWithUid = user.copyWith(authenticationId: uid);
 
-            final userRepository = UserRepository();
-            await userRepository.add(userWithUid);
+              final userRepository = UserRepository();
+              await userRepository.add(userWithUid);
+            } else {
+              final userRepository = UserRepository();
+              final user = await userRepository
+                  .findByLoginName(_loginNameController.text);
+              auth.login(user.email, _passwordController.text);
+            }
           },
           child: Text(_isRegister ? '登録' : 'ログイン'),
         )

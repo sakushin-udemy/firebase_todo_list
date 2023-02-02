@@ -19,4 +19,16 @@ class UserRepository {
       throw Exception('No user: $uid');
     }
   }
+
+  Future<DbUser> findByLoginName(String loginName) async {
+    final snapshot =
+        await _collection.where('loginName', isEqualTo: loginName).get();
+    final length = snapshot.docs.length;
+    if (length == 1) {
+      return DbUser.fromJson(snapshot.docs[0].data());
+    } else if (length == 0) {
+      throw Exception('No user: $loginName');
+    }
+    throw Exception('$length users was found: $loginName');
+  }
 }
