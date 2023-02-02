@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_todo_list/login_dialog.dart';
+import 'package:firebase_todo_list/repositories/authentication_repository.dart';
 import 'package:firebase_todo_list/repositories/todo_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -74,6 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _visibleDoneItem = false;
   bool _descending = false;
 
+  final _auth = AuthenticationRepository();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +85,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                onPressed: () => _auth.signOut(),
+                child: Text('ログアウト'),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
