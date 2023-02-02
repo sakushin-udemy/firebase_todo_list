@@ -190,9 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: //_onAddTodo,
-            () => showDialog(
-                context: context, builder: (context) => LoginDialog()),
+        onPressed: _onAddTodo,
         tooltip: 'add todo',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
