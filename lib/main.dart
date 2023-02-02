@@ -85,13 +85,30 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: () => _auth.signOut(),
-                child: Text('ログアウト'),
-              ),
-            ),
+            StreamBuilder(
+                stream: _auth.isLogin(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData || snapshot.hasError) {
+                    return Container();
+                  }
+
+                  final isLogin = snapshot.data;
+                  if (isLogin != true) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      showDialog(
+                          context: context,
+                          builder: (context) => const LoginDialog());
+                    });
+                  }
+
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton(
+                      onPressed: () => _auth.signOut(),
+                      child: Text('ログアウト'),
+                    ),
+                  );
+                }),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
