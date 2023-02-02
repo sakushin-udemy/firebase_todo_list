@@ -154,7 +154,7 @@ class _UserInfoInput extends StatelessWidget {
   final bool? obscureText;
   final TextEditingController? equalsController;
 
-  final borderStyle = OutlineInputBorder(
+  final boaderStyle = OutlineInputBorder(
     borderRadius: BorderRadius.circular(16),
     borderSide: const BorderSide(
       width: 1,
@@ -181,16 +181,16 @@ class _UserInfoInput extends StatelessWidget {
           return null;
         },
         decoration: InputDecoration(
-          border: borderStyle,
-          focusedBorder: borderStyle.copyWith(
+          border: boaderStyle,
+          focusedBorder: boaderStyle.copyWith(
             borderSide: const BorderSide(
               width: 2,
             ),
           ),
           labelStyle: Theme.of(context).textTheme.bodyMedium,
           labelText: label,
-          enabledBorder: borderStyle,
-          errorBorder: borderStyle.copyWith(
+          enabledBorder: boaderStyle,
+          errorBorder: boaderStyle.copyWith(
             borderSide: const BorderSide(
               color: Colors.red,
             ),
