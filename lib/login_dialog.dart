@@ -111,16 +111,13 @@ class _LoginDialogState extends State<LoginDialog> {
               nickname: _nicknameController.text,
             );
 
-            final repository = AuthenticationRepository();
+            final userRepository = UserRepository();
             if (_isRegister) {
-              final uid =
-                  await repository.register(user, _passwordController.text);
+              final uid = await auth.register(user, _passwordController.text);
               final userWithUid = user.copyWith(authenticationId: uid);
 
-              final userRepository = UserRepository();
               await userRepository.add(userWithUid);
             } else {
-              final userRepository = UserRepository();
               final user = await userRepository
                   .findByLoginName(_loginNameController.text);
               auth.login(user.email, _passwordController.text);
@@ -157,7 +154,7 @@ class _UserInfoInput extends StatelessWidget {
   final bool? obscureText;
   final TextEditingController? equalsController;
 
-  final boaderStyle = OutlineInputBorder(
+  final borderStyle = OutlineInputBorder(
     borderRadius: BorderRadius.circular(16),
     borderSide: const BorderSide(
       width: 1,
@@ -184,16 +181,16 @@ class _UserInfoInput extends StatelessWidget {
           return null;
         },
         decoration: InputDecoration(
-          border: boaderStyle,
-          focusedBorder: boaderStyle.copyWith(
+          border: borderStyle,
+          focusedBorder: borderStyle.copyWith(
             borderSide: const BorderSide(
               width: 2,
             ),
           ),
           labelStyle: Theme.of(context).textTheme.bodyMedium,
           labelText: label,
-          enabledBorder: boaderStyle,
-          errorBorder: boaderStyle.copyWith(
+          enabledBorder: borderStyle,
+          errorBorder: borderStyle.copyWith(
             borderSide: const BorderSide(
               color: Colors.red,
             ),
