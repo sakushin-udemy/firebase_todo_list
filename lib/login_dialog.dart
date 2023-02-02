@@ -92,6 +92,10 @@ class _LoginDialogState extends State<LoginDialog> {
       ),
       actions: [
         TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('戻る'),
+        ),
+        TextButton(
           onPressed: () => auth.signOut(),
           child: const Text('ログアウト'),
         ),
