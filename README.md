@@ -7,11 +7,21 @@
 - ご不明な点がありましたら、遠慮なくUdemyのQ&Aでお問い合わせください。
 
 ## 実行
+### FlutterFireの準備
+コースのセクション2をご覧下さい
+
+### Flutterの準備
 ```
-git clone https://github.com/sakushin-udemy/firebase_todo_list
+git clone https://github.com/sakushin-udemy/firebase_todo_list.git
+cd firebase_todo_list
 flutter pub get
 flutter pub run build_runner build
+flutterfire configure
 ```
+### Firebaseの準備
+- Firestoreの作成
+- Authenticationの作成
+メール/パスワードを有効(メールリンクは、無効)
 
 
 ## 動画コース一覧
