@@ -34,9 +34,9 @@ class TodoRepository {
     return collection;
   }
 
-  Stream<List<Todo>> convert(Query<Map<String, dynamic>> query) {
-    return query.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Todo.fromJson(doc.data())).toList());
+  Stream<List<Todo>> convert(Query<Map<String, dynamic>> stream) {
+    return stream.snapshots().map((snapshots) =>
+        snapshots.docs.map((doc) => Todo.fromJson(doc.data())).toList());
   }
 
   Stream<List<Todo>> streamAsList(

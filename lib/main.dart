@@ -155,21 +155,21 @@ class _MyHomePageState extends State<MyHomePage> {
                             return const CircularProgressIndicator();
                           }
 
-                          final todo = snapshot.data!;
+                          final todos = snapshot.data!;
                           return ListView.builder(
-                            itemCount: todo.length,
+                            itemCount: todos.length,
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
                                 onLongPress: () => _onTodoLongPressed(
-                                    todoRepository, todo[index]),
+                                    todoRepository, todos[index]),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: colors[todo[index].colorNo],
+                                    color: colors[todos[index].colorNo],
                                     borderRadius: BorderRadius.vertical(
                                       top: index == 0
                                           ? circularEdge
                                           : Radius.zero,
-                                      bottom: index == todo.length - 1
+                                      bottom: index == todos.length - 1
                                           ? circularEdge
                                           : Radius.zero,
                                     ),
@@ -182,25 +182,25 @@ class _MyHomePageState extends State<MyHomePage> {
                                         Transform.scale(
                                           scale: 1.5,
                                           child: Checkbox(
-                                            value: todo[index].isDone,
+                                            value: todos[index].isDone,
                                             shape: const CircleBorder(),
                                             onChanged: (isChecked) =>
                                                 _onChangeIsDone(todoRepository,
-                                                    todo[index], isChecked),
+                                                    todos[index], isChecked),
                                           ),
                                         ),
                                         Text(
-                                          todo[index].title,
+                                          todos[index].title,
                                           style: Theme.of(context)
                                               .textTheme
                                               .titleMedium,
                                         ),
                                         Expanded(child: Container()),
                                         Text(
-                                          todo[index].deadlineTime == null
+                                          todos[index].deadlineTime == null
                                               ? ''
                                               : formatDate.format(
-                                                  todo[index].deadlineTime!),
+                                                  todos[index].deadlineTime!),
                                         ),
                                       ],
                                     ),
