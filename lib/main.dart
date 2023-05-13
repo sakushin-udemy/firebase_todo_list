@@ -143,13 +143,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: StreamBuilder(
-                        stream: todoRepository
-                            .stream(
-                              isDone: _visibleDoneItem ? null : false,
-                              sortMethod: SortMethod.deadlineTime,
-                              descending: _descending,
-                            )
-                            .snapshots(),
+                        stream: todoRepository.streamAsList(
+                          isDone: _visibleDoneItem ? null : false,
+                          sortMethod: SortMethod.deadlineTime,
+                          descending: _descending,
+                        ),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return Text('Error: ${snapshot.error}');
@@ -157,9 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             return const CircularProgressIndicator();
                           }
 
-                          final todo = snapshot.data!.docs
-                              .map((e) => Todo.fromJson(e.data()))
-                              .toList();
+                          final todo = snapshot.data!;
                           return ListView.builder(
                             itemCount: todo.length,
                             itemBuilder: (BuildContext context, int index) {

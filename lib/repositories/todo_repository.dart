@@ -34,6 +34,17 @@ class TodoRepository {
     return collection;
   }
 
+  Stream<List<Todo>> convert(Query<Map<String, dynamic>> query) {
+    return query.snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Todo.fromJson(doc.data())).toList());
+  }
+
+  Stream<List<Todo>> streamAsList(
+      {SortMethod? sortMethod, bool? descending, bool? isDone}) {
+    return convert(
+        stream(sortMethod: sortMethod, descending: descending, isDone: isDone));
+  }
+
   /// TODOを追加
   Future<String> add(Todo newTodo) async {
     final doc = await _collection.add(newTodo.toJson());
