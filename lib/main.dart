@@ -4,9 +4,11 @@ import 'package:firebase_todo_list/login_dialog.dart';
 import 'package:firebase_todo_list/repositories/authentication_repository.dart';
 import 'package:firebase_todo_list/repositories/todo_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
+import 'data/main_vm.dart';
 import 'data/todo.dart';
 import 'firebase_options.dart';
 
@@ -20,7 +22,7 @@ void main() async {
   GetIt.I.registerLazySingleton<FirebaseFirestore>(
       () => FirebaseFirestore.instance);
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -39,21 +41,16 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color.fromRGBO(0xF2, 0xF2, 0xF2, 1.0),
         dialogBackgroundColor: const Color.fromRGBO(0xF2, 0xF2, 0xF2, 1.0),
       ),
-      home: const MyHomePage(title: 'Flutter Todo'),
+      home: MyHomePage(title: 'Flutter Todo'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class MyHomePage extends ConsumerWidget {
+  MyHomePage({super.key, required this.title});
 
   final String title;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   static List<Color> colors = [
     Colors.white.withOpacity(0.8),
     Colors.red.withOpacity(0.2),
@@ -63,20 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
     Colors.cyan.withOpacity(0.2),
   ];
 
-  String _title = '';
-  int _selectedColor = 0;
-  DateTime? _selectedDateTime = DateTime.now();
   final formatDate = DateFormat('yyyy/MM/dd');
 
   static const circularEdge = Radius.circular(16.0);
 
-  bool _visibleDoneItem = false;
-  bool _descending = false;
-
   final _auth = AuthenticationRepository();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(mainVmProvider.notifier);
     return StreamBuilder(
         stream: _auth.uid(),
         builder: (context, snapshot) {
@@ -117,26 +109,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         Transform.scale(
                           scale: 1.5,
                           child: Checkbox(
-                              value: _visibleDoneItem,
-                              onChanged: (value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                setState(() {
-                                  _visibleDoneItem = value;
-                                });
-                              }),
+                            value: vm.isDoneItemVisible,
+                            onChanged: vm.onVisibleDoneItem,
+                          ),
                         ),
                         const Text('実施済みも表示'),
                       ],
                     ),
                     ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _descending = !_descending;
-                          });
-                        },
-                        child: Text(_descending ? '締切 遅い' : '締切 早い'))
+                        onPressed: vm.onDescending,
+                        child: Text(vm.descending ? '締切 遅い' : '締切 早い'))
                   ],
                 ),
                 Expanded(
@@ -144,9 +126,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.all(16.0),
                     child: StreamBuilder(
                         stream: todoRepository.streamAsList(
-                          isDone: _visibleDoneItem ? null : false,
+                          isDone: vm.isDoneItemVisible ? null : false,
                           sortMethod: SortMethod.deadlineTime,
-                          descending: _descending,
+                          descending: vm.descending,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
@@ -161,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
                                 onLongPress: () => _onTodoLongPressed(
-                                    todoRepository, todos[index]),
+                                    context, todoRepository, todos[index]),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: colors[todos[index].colorNo],
@@ -216,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
             )),
 
             floatingActionButton: FloatingActionButton(
-              onPressed: () => _onAddTodo(todoRepository),
+              onPressed: () => _onAddTodo(context, vm),
               tooltip: 'add todo',
               child: const Icon(Icons.add),
             ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -224,31 +206,28 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  void _onAddTodo(TodoRepository todoRepository) {
-    _selectedColor = 0;
-    _selectedDateTime = null;
-    _title = '';
+  void _onAddTodo(BuildContext context, MainVm vm) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Column(
           children: [
             TextField(
-              onChanged: (value) => _title = value,
+              onChanged: (value) => vm.onTitleChanged,
             ),
             StatefulBuilder(builder: (context, setStateInSheet) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   OutlinedButton(
-                    child: _selectedDateTime == null
-                        ? Row(
-                            children: const [
+                    child: vm.selectedDate == null
+                        ? const Row(
+                            children: [
                               Icon(Icons.calendar_month),
                               Text('期限'),
                             ],
                           )
-                        : Text(formatDate.format(_selectedDateTime!)),
+                        : Text(formatDate.format(vm.selectedDate!)),
                     onPressed: () async {
                       final today = DateTime.now();
                       final date = await showDatePicker(
@@ -258,9 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         lastDate: today.add(const Duration(days: 100)),
                       );
                       if (date != null) {
-                        setStateInSheet(() {
-                          _selectedDateTime = date;
-                        });
+                        vm.onSelectedDate(date);
                       }
                     },
                   ),
@@ -272,32 +249,18 @@ class _MyHomePageState extends State<MyHomePage> {
                         scale: 1.5,
                         child: Radio<int>(
                           value: i,
-                          groupValue: _selectedColor,
+                          groupValue: vm.selectedColor,
                           fillColor: MaterialStateProperty.all(
                               colors[i].withOpacity(1.0)),
-                          onChanged: (int? index) {
-                            if (index != null) {
-                              setStateInSheet(() {
-                                _selectedColor = index;
-                              });
-                            }
-                          },
+                          onChanged: vm.onColorChanged,
                         ),
                       ),
                     ),
                   ElevatedButton(
-                      onPressed: _title.isEmpty
+                      onPressed: vm.title.isNotEmpty
                           ? null
                           : () async {
-                              final newTodo = Todo(
-                                id: '',
-                                title: _title,
-                                isDone: false,
-                                colorNo: _selectedColor,
-                                deadlineTime: _selectedDateTime,
-                                createdTime: DateTime.now(),
-                              );
-                              todoRepository.add(newTodo);
+                              vm.onCreateTodo();
                               if (context.mounted) {
                                 Navigator.pop(context);
                               }
@@ -322,7 +285,8 @@ class _MyHomePageState extends State<MyHomePage> {
     todoRepository.update(newData);
   }
 
-  void _onTodoLongPressed(TodoRepository todoRepository, Todo todo) async {
+  void _onTodoLongPressed(
+      BuildContext context, TodoRepository todoRepository, Todo todo) async {
     var result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
