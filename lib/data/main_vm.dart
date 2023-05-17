@@ -25,7 +25,7 @@ Stream<QuerySnapshot<Map<String, dynamic>>> todoRepository(
 
 @riverpod
 class MainVm extends _$MainVm {
-  final _todoRepository = TodoRepository('user');
+  TodoRepository? _todoRepository;
 
   @override
   MainModel build() => MainModel(newTodoDateTime: DateTime.now());
@@ -39,6 +39,10 @@ class MainVm extends _$MainVm {
   DateTime? get selectedDate => state.newTodoDateTime;
 
   String get title => state.newTodoTitle;
+
+  void onChangeTodoRepository(TodoRepository? todoRepository) {
+    _todoRepository = todoRepository;
+  }
 
   void onTitleChanged(String value) {
     state = state.copyWith(newTodoTitle: value);
@@ -70,14 +74,17 @@ class MainVm extends _$MainVm {
   }
 
   void onChangeIsDone(Todo todo, bool? value) {
+    assert(_todoRepository != null);
     if (value == null) {
       return;
     }
     final newData = todo.copyWith(isDone: value);
-    _todoRepository.update(newData);
+    _todoRepository!.update(newData);
   }
 
   void onCreateTodo() {
+    assert(_todoRepository != null);
+
     final newTodo = Todo(
       id: '',
       title: state.newTodoTitle,
@@ -86,10 +93,12 @@ class MainVm extends _$MainVm {
       deadlineTime: state.newTodoDateTime,
       createdTime: DateTime.now(),
     );
-    _todoRepository.add(newTodo);
+    _todoRepository!.add(newTodo);
   }
 
   void onDeleteTodo(Todo todo) {
-    _todoRepository.delete(todo.id);
+    assert(_todoRepository != null);
+
+    _todoRepository!.delete(todo.id);
   }
 }
