@@ -36,4 +36,11 @@ class MainVm extends _$MainVm {
   DateTime? get selectedDate => state.newTodoDateTime;
 
   String get title => state.newTodoTitle;
+
+  void onVisibleDoneItem(bool? value) {
+    if (value == null) {
+      return;
+    }
+    state = state.copyWith(visibleDoneItem: value);
+  }
 }

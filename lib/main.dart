@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_todo_list/login_dialog.dart';
+import 'package:firebase_todo_list/main_vm.dart';
 import 'package:firebase_todo_list/repositories/authentication_repository.dart';
 import 'package:firebase_todo_list/repositories/todo_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
@@ -39,21 +41,16 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color.fromRGBO(0xF2, 0xF2, 0xF2, 1.0),
         dialogBackgroundColor: const Color.fromRGBO(0xF2, 0xF2, 0xF2, 1.0),
       ),
-      home: const MyHomePage(title: 'Flutter Todo'),
+      home: MyHomePage(title: 'Flutter Todo'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class MyHomePage extends ConsumerWidget {
+  MyHomePage({super.key, required this.title});
 
   final String title;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   static List<Color> colors = [
     Colors.white.withOpacity(0.8),
     Colors.red.withOpacity(0.2),
@@ -76,7 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final _auth = AuthenticationRepository();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(mainVmProvider.notifier);
+
     return StreamBuilder(
         stream: _auth.uid(),
         builder: (context, snapshot) {
@@ -117,15 +116,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         Transform.scale(
                           scale: 1.5,
                           child: Checkbox(
-                              value: _visibleDoneItem,
-                              onChanged: (value) {
-                                if (value == null) {
-                                  return;
-                                }
-                                setState(() {
-                                  _visibleDoneItem = value;
-                                });
-                              }),
+                              value: vm.isDoneItemVisible,
+                              onChanged: vm.onVisibleDoneItem),
                         ),
                         const Text('実施済みも表示'),
                       ],
