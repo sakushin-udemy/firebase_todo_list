@@ -101,4 +101,15 @@ class MainVm extends _$MainVm {
 
     _todoRepository!.delete(todo.id);
   }
+
+  void onLongTapTodo(Todo todo, Future<bool?> confirmDelete) {
+    assert(_todoRepository != null);
+
+    confirmDelete.then((result) {
+      if (result != true) {
+        return;
+      }
+      _todoRepository!.delete(todo.id);
+    });
+  }
 }

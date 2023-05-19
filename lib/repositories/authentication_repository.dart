@@ -1,5 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/db_user.dart';
+
+part 'authentication_repository.g.dart';
+
+@riverpod
+Stream<String> firebaseUid(ref) {
+  return FirebaseAuth.instance.userChanges().map((user) => user?.uid ?? '');
+}
+
+@riverpod
+Stream<bool> firebaseLogin(ref) {
+  return firebaseUid(ref).map((e) => e.isNotEmpty);
+}
 
 class AuthenticationRepository {
   FirebaseAuth auth = FirebaseAuth.instance;

@@ -69,14 +69,11 @@ class MyHomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vm = ref.watch(mainVmProvider.notifier);
-    return StreamBuilder(
-        stream: _auth.uid(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.hasError) {
-            return const CircularProgressIndicator();
-          }
 
-          final userId = snapshot.data!;
+    return ref.watch(firebaseUidProvider).when(
+        error: (er, st) => Text('$er'),
+        loading: () => const CircularProgressIndicator(),
+        data: (userId) {
           if (userId.isEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               showDialog(
@@ -86,7 +83,7 @@ class MyHomePage extends ConsumerWidget {
           }
 
           // ログインしている
-          final todoRepository = TodoRepository(userId);
+          vm.onChangeTodoRepository(TodoRepository(userId));
 
           return Scaffold(
             appBar: AppBar(),
@@ -124,74 +121,74 @@ class MyHomePage extends ConsumerWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: StreamBuilder(
-                        stream: todoRepository.streamAsList(
-                          isDone: vm.isDoneItemVisible ? null : false,
-                          sortMethod: SortMethod.deadlineTime,
-                          descending: vm.descending,
-                        ),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (!snapshot.hasData) {
-                            return const CircularProgressIndicator();
-                          }
-
-                          final todos = snapshot.data!;
-                          return ListView.builder(
-                            itemCount: todos.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return GestureDetector(
-                                onLongPress: () => _onTodoLongPressed(
-                                    context, todoRepository, todos[index]),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: colors[todos[index].colorNo],
-                                    borderRadius: BorderRadius.vertical(
-                                      top: index == 0
-                                          ? circularEdge
-                                          : Radius.zero,
-                                      bottom: index == todos.length - 1
-                                          ? circularEdge
-                                          : Radius.zero,
+                    child: ref
+                        .watch(todoRepositoryProvider(
+                            userId: userId,
+                            visibleDoneItem: vm.isDoneItemVisible,
+                            descending: vm.descending))
+                        .when(
+                            error: (e, _) => Text(e.toString()),
+                            loading: () => const CircularProgressIndicator(),
+                            data: (data) {
+                              final todos = data.docs
+                                  .map((e) => Todo.fromJson(e.data()))
+                                  .toList();
+                              return ListView.builder(
+                                itemCount: todos.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return GestureDetector(
+                                    onLongPress: () => vm.onLongTapTodo(
+                                        todos[index],
+                                        _showConfirmDeleteDialog(
+                                            context, todos[index])),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: colors[todos[index].colorNo],
+                                        borderRadius: BorderRadius.vertical(
+                                          top: index == 0
+                                              ? circularEdge
+                                              : Radius.zero,
+                                          bottom: index == todos.length - 1
+                                              ? circularEdge
+                                              : Radius.zero,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0, vertical: 4.0),
+                                        child: Row(
+                                          children: [
+                                            Transform.scale(
+                                                scale: 1.5,
+                                                child: Checkbox(
+                                                    value: todos[index].isDone,
+                                                    shape: const CircleBorder(),
+                                                    onChanged: (isChecked) =>
+                                                        vm.onChangeIsDone(
+                                                            todos[index],
+                                                            isChecked))),
+                                            Text(
+                                              todos[index].title,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium,
+                                            ),
+                                            Expanded(child: Container()),
+                                            Text(
+                                              todos[index].deadlineTime == null
+                                                  ? ''
+                                                  : formatDate.format(
+                                                      todos[index]
+                                                          .deadlineTime!),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 4.0),
-                                    child: Row(
-                                      children: [
-                                        Transform.scale(
-                                          scale: 1.5,
-                                          child: Checkbox(
-                                            value: todos[index].isDone,
-                                            shape: const CircleBorder(),
-                                            onChanged: (isChecked) =>
-                                                _onChangeIsDone(todoRepository,
-                                                    todos[index], isChecked),
-                                          ),
-                                        ),
-                                        Text(
-                                          todos[index].title,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,
-                                        ),
-                                        Expanded(child: Container()),
-                                        Text(
-                                          todos[index].deadlineTime == null
-                                              ? ''
-                                              : formatDate.format(
-                                                  todos[index].deadlineTime!),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                  );
+                                },
                               );
-                            },
-                          );
-                        }),
+                            }),
                   ),
                 ),
               ],
@@ -275,19 +272,8 @@ class MyHomePage extends ConsumerWidget {
     );
   }
 
-  void _onChangeIsDone(
-      TodoRepository todoRepository, Todo todo, bool? isChecked) {
-    if (isChecked == null) {
-      return;
-    }
-
-    final newData = todo.copyWith(isDone: isChecked);
-    todoRepository.update(newData);
-  }
-
-  void _onTodoLongPressed(
-      BuildContext context, TodoRepository todoRepository, Todo todo) async {
-    var result = await showDialog<bool>(
+  Future<bool?> _showConfirmDeleteDialog(BuildContext context, Todo todo) {
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: const Text('確認'),
@@ -304,9 +290,5 @@ class MyHomePage extends ConsumerWidget {
         ],
       ),
     );
-
-    if (result == true) {
-      todoRepository.delete(todo.id);
-    }
   }
 }
