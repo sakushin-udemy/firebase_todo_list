@@ -67,7 +67,6 @@ class MyHomePage extends ConsumerWidget {
 
   static const circularEdge = Radius.circular(16.0);
 
-  bool _visibleDoneItem = false;
   bool _descending = false;
 
   final _auth = AuthenticationRepository();
@@ -136,7 +135,7 @@ class MyHomePage extends ConsumerWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: StreamBuilder(
                         stream: todoRepository.streamAsList(
-                          isDone: _visibleDoneItem ? null : false,
+                          isDone: vm.isDoneItemVisible ? null : false,
                           sortMethod: SortMethod.deadlineTime,
                           descending: _descending,
                         ),
