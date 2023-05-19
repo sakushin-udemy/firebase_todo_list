@@ -22,6 +22,18 @@ Stream<QuerySnapshot<Map<String, dynamic>>> todoRepository(
 
 @riverpod
 class MainVm extends _$MainVm {
+  TodoRepository? _todoRepository;
+
   @override
   MainModel build() => MainModel(newTodoDateTime: DateTime.now());
+
+  bool get isDoneItemVisible => state.visibleDoneItem;
+
+  bool get descending => state.descending;
+
+  int get selectedColor => state.newTodoColor;
+
+  DateTime? get selectedDate => state.newTodoDateTime;
+
+  String get title => state.newTodoTitle;
 }
