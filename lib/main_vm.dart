@@ -43,4 +43,8 @@ class MainVm extends _$MainVm {
     }
     state = state.copyWith(visibleDoneItem: value);
   }
+
+  void onDescending() {
+    state = state.copyWith(descending: !state.descending);
+  }
 }

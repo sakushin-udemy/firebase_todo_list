@@ -67,8 +67,6 @@ class MyHomePage extends ConsumerWidget {
 
   static const circularEdge = Radius.circular(16.0);
 
-  bool _descending = false;
-
   final _auth = AuthenticationRepository();
 
   @override
@@ -122,12 +120,8 @@ class MyHomePage extends ConsumerWidget {
                       ],
                     ),
                     ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _descending = !_descending;
-                          });
-                        },
-                        child: Text(_descending ? '締切 遅い' : '締切 早い'))
+                        onPressed: vm.onDescending,
+                        child: Text(vm.descending ? '締切 遅い' : '締切 早い'))
                   ],
                 ),
                 Expanded(
@@ -137,7 +131,7 @@ class MyHomePage extends ConsumerWidget {
                         stream: todoRepository.streamAsList(
                           isDone: vm.isDoneItemVisible ? null : false,
                           sortMethod: SortMethod.deadlineTime,
-                          descending: _descending,
+                          descending: vm.descending,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
