@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
-import 'repositories/authentication_repository.dart';
 import 'data/todo.dart';
 import 'firebase_options.dart';
 
