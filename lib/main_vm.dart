@@ -47,4 +47,28 @@ class MainVm extends _$MainVm {
   void onDescending() {
     state = state.copyWith(descending: !state.descending);
   }
+
+  void onClearSheet() {
+    state = state.copyWith(
+        newTodoTitle: '', newTodoColor: 0, newTodoDateTime: null);
+  }
+
+  void onChangeTitle(String value) {
+    state = state.copyWith(newTodoTitle: value);
+  }
+
+  void onChangeColor(int? value) {
+    if (value == null) {
+      return;
+    }
+
+    state = state.copyWith(newTodoColor: value);
+  }
+
+  void onChangeDateTime(DateTime? value) {
+    if (value == null) {
+      return;
+    }
+    state = state.copyWith(newTodoDateTime: value);
+  }
 }

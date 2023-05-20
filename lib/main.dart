@@ -22,7 +22,7 @@ void main() async {
   GetIt.I.registerLazySingleton<FirebaseFirestore>(
       () => FirebaseFirestore.instance);
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -60,9 +60,6 @@ class MyHomePage extends ConsumerWidget {
     Colors.cyan.withOpacity(0.2),
   ];
 
-  String _title = '';
-  int _selectedColor = 0;
-  DateTime? _selectedDateTime = DateTime.now();
   final formatDate = DateFormat('yyyy/MM/dd');
 
   static const circularEdge = Radius.circular(16.0);
@@ -146,7 +143,7 @@ class MyHomePage extends ConsumerWidget {
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
                                 onLongPress: () => _onTodoLongPressed(
-                                    todoRepository, todos[index]),
+                                    context, todoRepository, todos[index]),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: colors[todos[index].colorNo],
@@ -201,7 +198,7 @@ class MyHomePage extends ConsumerWidget {
             )),
 
             floatingActionButton: FloatingActionButton(
-              onPressed: () => _onAddTodo(todoRepository),
+              onPressed: () => _onAddTodo(context, vm, todoRepository),
               tooltip: 'add todo',
               child: const Icon(Icons.add),
             ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -209,31 +206,30 @@ class MyHomePage extends ConsumerWidget {
         });
   }
 
-  void _onAddTodo(TodoRepository todoRepository) {
-    _selectedColor = 0;
-    _selectedDateTime = null;
-    _title = '';
+  void _onAddTodo(
+      BuildContext context, MainVm vm, TodoRepository todoRepository) {
+    vm.onClearSheet();
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Column(
           children: [
             TextField(
-              onChanged: (value) => _title = value,
+              onChanged: vm.onChangeTitle,
             ),
             StatefulBuilder(builder: (context, setStateInSheet) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   OutlinedButton(
-                    child: _selectedDateTime == null
+                    child: vm.selectedDate == null
                         ? Row(
                             children: const [
                               Icon(Icons.calendar_month),
                               Text('期限'),
                             ],
                           )
-                        : Text(formatDate.format(_selectedDateTime!)),
+                        : Text(formatDate.format(vm.selectedDate!)),
                     onPressed: () async {
                       final today = DateTime.now();
                       final date = await showDatePicker(
@@ -242,11 +238,7 @@ class MyHomePage extends ConsumerWidget {
                         firstDate: today.subtract(const Duration(days: 10)),
                         lastDate: today.add(const Duration(days: 100)),
                       );
-                      if (date != null) {
-                        setStateInSheet(() {
-                          _selectedDateTime = date;
-                        });
-                      }
+                      vm.onChangeDateTime(date);
                     },
                   ),
                   for (int i = 0; i < colors.length; i++)
@@ -257,29 +249,23 @@ class MyHomePage extends ConsumerWidget {
                         scale: 1.5,
                         child: Radio<int>(
                           value: i,
-                          groupValue: _selectedColor,
+                          groupValue: vm.selectedColor,
                           fillColor: MaterialStateProperty.all(
                               colors[i].withOpacity(1.0)),
-                          onChanged: (int? index) {
-                            if (index != null) {
-                              setStateInSheet(() {
-                                _selectedColor = index;
-                              });
-                            }
-                          },
+                          onChanged: vm.onChangeColor,
                         ),
                       ),
                     ),
                   ElevatedButton(
-                      onPressed: _title.isEmpty
+                      onPressed: vm.title.isEmpty
                           ? null
                           : () async {
                               final newTodo = Todo(
                                 id: '',
-                                title: _title,
+                                title: vm.title,
                                 isDone: false,
-                                colorNo: _selectedColor,
-                                deadlineTime: _selectedDateTime,
+                                colorNo: vm.selectedColor,
+                                deadlineTime: vm.selectedDate,
                                 createdTime: DateTime.now(),
                               );
                               todoRepository.add(newTodo);
@@ -307,7 +293,8 @@ class MyHomePage extends ConsumerWidget {
     todoRepository.update(newData);
   }
 
-  void _onTodoLongPressed(TodoRepository todoRepository, Todo todo) async {
+  void _onTodoLongPressed(
+      BuildContext context, TodoRepository todoRepository, Todo todo) async {
     var result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
