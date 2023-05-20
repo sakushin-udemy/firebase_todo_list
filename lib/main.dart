@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
+import 'repositories/authentication_repository.dart';
 import 'data/todo.dart';
 import 'firebase_options.dart';
 
@@ -70,14 +71,10 @@ class MyHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final vm = ref.watch(mainVmProvider.notifier);
 
-    return StreamBuilder(
-        stream: _auth.uid(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.hasError) {
-            return const CircularProgressIndicator();
-          }
-
-          final userId = snapshot.data!;
+    return ref.watch(firebaseUidProvider).when(
+        error: (error, st) => Text(error.toString()),
+        loading: () => const CircularProgressIndicator(),
+        data: (userId) {
           if (userId.isEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               showDialog(
