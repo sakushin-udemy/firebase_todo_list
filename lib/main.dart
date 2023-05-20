@@ -110,7 +110,8 @@ class MyHomePage extends ConsumerWidget {
                         Transform.scale(
                           scale: 1.5,
                           child: Checkbox(
-                              value: vm.isDoneItemVisible,
+                              value: ref.watch(mainVmProvider
+                                  .select((e) => e.visibleDoneItem)),
                               onChanged: vm.onVisibleDoneItem),
                         ),
                         const Text('実施済みも表示'),
@@ -118,7 +119,10 @@ class MyHomePage extends ConsumerWidget {
                     ),
                     ElevatedButton(
                         onPressed: vm.onDescending,
-                        child: Text(vm.descending ? '締切 遅い' : '締切 早い'))
+                        child: Text(ref.watch(
+                                mainVmProvider.select((e) => e.descending))
+                            ? '締切 遅い'
+                            : '締切 早い'))
                   ],
                 ),
                 Expanded(
