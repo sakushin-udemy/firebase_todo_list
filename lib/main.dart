@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_todo_list/login_dialog.dart';
 import 'package:firebase_todo_list/main_vm.dart';
 import 'package:firebase_todo_list/repositories/authentication_repository.dart';
-import 'package:firebase_todo_list/repositories/todo_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
