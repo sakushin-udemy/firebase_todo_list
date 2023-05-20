@@ -124,72 +124,74 @@ class MyHomePage extends ConsumerWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: StreamBuilder(
-                        stream: todoRepository.streamAsList(
-                          isDone: vm.isDoneItemVisible ? null : false,
-                          sortMethod: SortMethod.deadlineTime,
-                          descending: vm.descending,
-                        ),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (!snapshot.hasData) {
-                            return const CircularProgressIndicator();
-                          }
-
-                          final todos = snapshot.data!;
-                          return ListView.builder(
-                            itemCount: todos.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return GestureDetector(
-                                onLongPress: () => vm.onTodoLongTapped(todos[index], _confirmDelete(context, todos[index]),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: colors[todos[index].colorNo],
-                                    borderRadius: BorderRadius.vertical(
-                                      top: index == 0
-                                          ? circularEdge
-                                          : Radius.zero,
-                                      bottom: index == todos.length - 1
-                                          ? circularEdge
-                                          : Radius.zero,
+                    child: ref
+                        .watch(todoRepositoryProvider(
+                            userId: userId,
+                            descending: vm.descending,
+                            visibleDoneItem: vm.isDoneItemVisible))
+                        .when(
+                            error: (error, st) => Text(error.toString()),
+                            loading: () => const CircularProgressIndicator(),
+                            data: (data) {
+                              final todos = data.docs
+                                  .map((e) => Todo.fromJson(e.data()))
+                                  .toList();
+                              return ListView.builder(
+                                itemCount: todos.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return GestureDetector(
+                                    onLongPress: () => vm.onTodoLongTapped(
+                                        todos[index],
+                                        _confirmDelete(context, todos[index])),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: colors[todos[index].colorNo],
+                                        borderRadius: BorderRadius.vertical(
+                                          top: index == 0
+                                              ? circularEdge
+                                              : Radius.zero,
+                                          bottom: index == todos.length - 1
+                                              ? circularEdge
+                                              : Radius.zero,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0, vertical: 4.0),
+                                        child: Row(
+                                          children: [
+                                            Transform.scale(
+                                              scale: 1.5,
+                                              child: Checkbox(
+                                                  value: todos[index].isDone,
+                                                  shape: const CircleBorder(),
+                                                  onChanged: (isChecked) =>
+                                                      vm.onChangeTodoDone(
+                                                          todos[index],
+                                                          isChecked)),
+                                            ),
+                                            Text(
+                                              todos[index].title,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium,
+                                            ),
+                                            Expanded(child: Container()),
+                                            Text(
+                                              todos[index].deadlineTime == null
+                                                  ? ''
+                                                  : formatDate.format(
+                                                      todos[index]
+                                                          .deadlineTime!),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 4.0),
-                                    child: Row(
-                                      children: [
-                                        Transform.scale(
-                                          scale: 1.5,
-                                          child: Checkbox(
-                                              value: todos[index].isDone,
-                                              shape: const CircleBorder(),
-                                              onChanged: (isChecked) =>
-                                                  vm.onChangeTodoDone(
-                                                      todos[index], isChecked)),
-                                        ),
-                                        Text(
-                                          todos[index].title,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,
-                                        ),
-                                        Expanded(child: Container()),
-                                        Text(
-                                          todos[index].deadlineTime == null
-                                              ? ''
-                                              : formatDate.format(
-                                                  todos[index].deadlineTime!),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                  );
+                                },
                               );
-                            },
-                          );
-                        }),
+                            }),
                   ),
                 ),
               ],
@@ -272,24 +274,22 @@ class MyHomePage extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _confirmDelete(BuildContext context, Todo todo){
-    return
-      showDialog<bool>(
+  Future<bool?> _confirmDelete(BuildContext context, Todo todo) {
+    return showDialog<bool>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-      title: const Text('確認'),
-      content: Text('「${todo.title}」を削除します'),
-      actions: <Widget>[
-        SimpleDialogOption(
-          child: const Text('キャンセル'),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        SimpleDialogOption(
-          child: const Text('削除'),
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
-      ],
-    ));
+              title: const Text('確認'),
+              content: Text('「${todo.title}」を削除します'),
+              actions: <Widget>[
+                SimpleDialogOption(
+                  child: const Text('キャンセル'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                SimpleDialogOption(
+                  child: const Text('削除'),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            ));
   }
-
 }
