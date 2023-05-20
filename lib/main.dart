@@ -87,7 +87,7 @@ class MyHomePage extends ConsumerWidget {
           }
 
           // ログインしている
-          final todoRepository = TodoRepository(userId);
+          vm.onChangeUser(userId);
 
           return Scaffold(
             appBar: AppBar(),
@@ -142,8 +142,7 @@ class MyHomePage extends ConsumerWidget {
                             itemCount: todos.length,
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
-                                onLongPress: () => _onTodoLongPressed(
-                                    context, todoRepository, todos[index]),
+                                onLongPress: () => vm.onTodoLongTapped(todos[index], _confirmDelete(context, todos[index]),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: colors[todos[index].colorNo],
@@ -164,12 +163,11 @@ class MyHomePage extends ConsumerWidget {
                                         Transform.scale(
                                           scale: 1.5,
                                           child: Checkbox(
-                                            value: todos[index].isDone,
-                                            shape: const CircleBorder(),
-                                            onChanged: (isChecked) =>
-                                                _onChangeIsDone(todoRepository,
-                                                    todos[index], isChecked),
-                                          ),
+                                              value: todos[index].isDone,
+                                              shape: const CircleBorder(),
+                                              onChanged: (isChecked) =>
+                                                  vm.onChangeTodoDone(
+                                                      todos[index], isChecked)),
                                         ),
                                         Text(
                                           todos[index].title,
@@ -198,7 +196,7 @@ class MyHomePage extends ConsumerWidget {
             )),
 
             floatingActionButton: FloatingActionButton(
-              onPressed: () => _onAddTodo(context, vm, todoRepository),
+              onPressed: () => _onAddTodo(context, vm),
               tooltip: 'add todo',
               child: const Icon(Icons.add),
             ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -206,8 +204,7 @@ class MyHomePage extends ConsumerWidget {
         });
   }
 
-  void _onAddTodo(
-      BuildContext context, MainVm vm, TodoRepository todoRepository) {
+  void _onAddTodo(BuildContext context, MainVm vm) {
     vm.onClearSheet();
     showModalBottomSheet(
       context: context,
@@ -260,15 +257,7 @@ class MyHomePage extends ConsumerWidget {
                       onPressed: vm.title.isEmpty
                           ? null
                           : () async {
-                              final newTodo = Todo(
-                                id: '',
-                                title: vm.title,
-                                isDone: false,
-                                colorNo: vm.selectedColor,
-                                deadlineTime: vm.selectedDate,
-                                createdTime: DateTime.now(),
-                              );
-                              todoRepository.add(newTodo);
+                              vm.onAddTodo();
                               if (context.mounted) {
                                 Navigator.pop(context);
                               }
@@ -283,38 +272,24 @@ class MyHomePage extends ConsumerWidget {
     );
   }
 
-  void _onChangeIsDone(
-      TodoRepository todoRepository, Todo todo, bool? isChecked) {
-    if (isChecked == null) {
-      return;
-    }
-
-    final newData = todo.copyWith(isDone: isChecked);
-    todoRepository.update(newData);
+  Future<bool?> _confirmDelete(BuildContext context, Todo todo){
+    return
+      showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+      title: const Text('確認'),
+      content: Text('「${todo.title}」を削除します'),
+      actions: <Widget>[
+        SimpleDialogOption(
+          child: const Text('キャンセル'),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        SimpleDialogOption(
+          child: const Text('削除'),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    ));
   }
 
-  void _onTodoLongPressed(
-      BuildContext context, TodoRepository todoRepository, Todo todo) async {
-    var result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('確認'),
-        content: Text('「${todo.title}」を削除します'),
-        actions: <Widget>[
-          SimpleDialogOption(
-            child: const Text('キャンセル'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          SimpleDialogOption(
-            child: const Text('削除'),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    );
-
-    if (result == true) {
-      todoRepository.delete(todo.id);
-    }
-  }
 }

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_todo_list/data/main_model.dart';
 import 'package:firebase_todo_list/repositories/todo_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'data/todo.dart';
 part 'main_vm.g.dart';
 
 @riverpod
@@ -37,6 +39,10 @@ class MainVm extends _$MainVm {
 
   String get title => state.newTodoTitle;
 
+  void onChangeUser(String userId) {
+    _todoRepository = TodoRepository(userId);
+  }
+
   void onVisibleDoneItem(bool? value) {
     if (value == null) {
       return;
@@ -70,5 +76,40 @@ class MainVm extends _$MainVm {
       return;
     }
     state = state.copyWith(newTodoDateTime: value);
+  }
+
+  void onAddTodo() {
+    assert(_todoRepository != null);
+
+    final newTodo = Todo(
+      id: '',
+      title: title,
+      isDone: false,
+      colorNo: selectedColor,
+      deadlineTime: selectedDate,
+      createdTime: DateTime.now(),
+    );
+    _todoRepository!.add(newTodo);
+  }
+
+  void onChangeTodoDone(Todo todo, bool? value) {
+    assert(_todoRepository != null);
+    if (value == null) {
+      return;
+    }
+
+    final newData = todo.copyWith(isDone: value);
+    _todoRepository!.update(newData);
+  }
+
+  void onTodoLongTapped(Todo todo, Future<bool?> confirmDelete) {
+    assert(_todoRepository != null);
+
+    confirmDelete.then((result) {
+      if (result != true) {
+        return;
+      }
+      _todoRepository!.delete(todo.id);
+    });
   }
 }
